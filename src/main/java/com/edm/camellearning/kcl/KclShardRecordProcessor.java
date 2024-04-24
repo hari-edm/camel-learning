@@ -3,6 +3,7 @@ package com.edm.camellearning.kcl;
 import com.edm.camellearning.components.CamelKclConsumer;
 import com.edm.camellearning.components.CamelKclEndpoint;
 import com.edm.camellearning.components.CamelKclProcessor;
+import jakarta.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -17,37 +18,34 @@ import software.amazon.kinesis.processor.ShardRecordProcessor;
 
 @Component
 @Scope(value = "prototype")
-public class KclRecordProcessor implements ShardRecordProcessor {
+public class KclShardRecordProcessor implements ShardRecordProcessor {
 
-  public KclRecordProcessor(ApplicationContext context) {
-    this.beanFactory = context;
+  public KclShardRecordProcessor(ApplicationContext context) {
+    this.context = context;
   }
 
   private static final String SHARD_ID_MDC_KEY = "ShardId";
 
-  @Autowired private ApplicationContext beanFactory;
+  @Autowired private ApplicationContext context;
 
   CamelKclConsumer consumer;
 
-  // @Autowired ConsumerBridge bridge;
+  @PostConstruct
+  public void init() {
+    consumer = context.getBean(CamelKclConsumer.class);
+  }
 
-  private static final Logger log = LoggerFactory.getLogger(KclRecordProcessor.class);
+  private static final Logger log = LoggerFactory.getLogger(KclShardRecordProcessor.class);
 
   private String shardId;
 
-  /**
-   * Invoked by the KCL before data records are delivered to the ShardRecordProcessor instance (via
-   * processRecords). In this example we do nothing except some logging.
-   *
-   * @param initializationInput Provides information related to initialization.
-   */
   public void initialize(InitializationInput initializationInput) {
     shardId = initializationInput.shardId();
     MDC.put(SHARD_ID_MDC_KEY, shardId);
     try {
       consumer =
           (CamelKclConsumer)
-              beanFactory
+              context
                   .getBean("myCustomEndpoint", CamelKclEndpoint.class)
                   .createConsumer(new CamelKclProcessor());
     } catch (Exception e) {
@@ -60,13 +58,6 @@ public class KclRecordProcessor implements ShardRecordProcessor {
     }
   }
 
-  /**
-   * Handles record processing logic. The Amazon Kinesis Client Library will invoke this method to
-   * deliver data records to the application. In this example we simply log our records.
-   *
-   * @param processRecordsInput Provides the records to be processed as well as information and
-   *     capabilities related to them (e.g. checkpointing).
-   */
   public void processRecords(ProcessRecordsInput processRecordsInput) {
     MDC.put(SHARD_ID_MDC_KEY, shardId);
     try {
@@ -86,12 +77,6 @@ public class KclRecordProcessor implements ShardRecordProcessor {
     }
   }
 
-  /**
-   * Called when the lease tied to this record processor has been lost. Once the lease has been
-   * lost, the record processor can no longer checkpoint.
-   *
-   * @param leaseLostInput Provides access to functions and data related to the loss of the lease.
-   */
   public void leaseLost(LeaseLostInput leaseLostInput) {
     MDC.put(SHARD_ID_MDC_KEY, shardId);
     try {
@@ -114,13 +99,6 @@ public class KclRecordProcessor implements ShardRecordProcessor {
     }
   }
 
-  /**
-   * Invoked when Scheduler has been requested to shut down (i.e. we decide to stop running the app
-   * by pressing Enter). Checkpoints and logs the data a final time.
-   *
-   * @param shutdownRequestedInput Provides access to a checkpointer, allowing a record processor to
-   *     checkpoint before the shutdown is completed.
-   */
   public void shutdownRequested(ShutdownRequestedInput shutdownRequestedInput) {
     MDC.put(SHARD_ID_MDC_KEY, shardId);
     try {

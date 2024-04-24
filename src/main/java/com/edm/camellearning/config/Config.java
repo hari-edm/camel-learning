@@ -1,7 +1,7 @@
 package com.edm.camellearning.config;
 
 import com.edm.camellearning.components.*;
-import com.edm.camellearning.kcl.KclRecordProcessorFactory;
+import com.edm.camellearning.kcl.KclShardRecordProcessorFactory;
 import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -26,11 +26,12 @@ public class Config {
   @Value("${kds.name}")
   private String streamName;
 
-  @Autowired private KclRecordProcessorFactory factory;
+  @Autowired private KclShardRecordProcessorFactory factory;
 
   @Bean("myCustomEndpoint")
   @Scope("prototype")
-  public CamelKclEndpoint myCustomEndpoint(String uri, CamelKclComponent component) {
+  public CamelKclEndpoint myCustomEndpoint(
+      @Value("${endpoint}") String uri, CamelKclComponent component) {
     return new CamelKclEndpoint(uri, component, getScheduler());
   }
 
