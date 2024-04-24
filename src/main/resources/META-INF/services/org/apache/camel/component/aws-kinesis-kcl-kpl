@@ -1,0 +1,2 @@
+class=com.edm.camellearning.components.MyCustomComponent
+#class=org.apache.camel.component.aws2.kinesis.Kinesis2Component
