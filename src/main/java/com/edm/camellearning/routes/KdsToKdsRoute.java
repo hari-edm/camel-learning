@@ -1,7 +1,5 @@
 package com.edm.camellearning.routes;
 
-import org.apache.camel.Exchange;
-import org.apache.camel.Processor;
 import org.apache.camel.builder.RouteBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,8 +8,8 @@ import org.springframework.stereotype.Component;
 
 
 @Component
-public class AbcRoute extends RouteBuilder {
-    Logger logger = LoggerFactory.getLogger(AbcRoute.class);
+public class KdsToKdsRoute extends RouteBuilder {
+    Logger logger = LoggerFactory.getLogger(KdsToKdsRoute.class);
     @Override
     public void configure() throws Exception {
 

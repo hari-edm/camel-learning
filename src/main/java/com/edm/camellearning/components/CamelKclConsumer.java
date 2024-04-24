@@ -1,6 +1,6 @@
 package com.edm.camellearning.components;
 
-import com.edm.camellearning.SampleRecordProcessor;
+import com.edm.camellearning.kcl.KclRecordProcessor;
 import org.apache.camel.Endpoint;
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
@@ -10,7 +10,6 @@ import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
-import org.springframework.stereotype.Component;
 import software.amazon.kinesis.coordinator.Scheduler;
 import software.amazon.kinesis.exceptions.InvalidStateException;
 import software.amazon.kinesis.exceptions.ShutdownException;
@@ -18,10 +17,10 @@ import software.amazon.kinesis.lifecycle.events.*;
 import software.amazon.kinesis.processor.ShardRecordProcessor;
 
 //@Component
-public class MyCustomConsumer extends DefaultConsumer implements ShardRecordProcessor {
+public class CamelKclConsumer extends DefaultConsumer implements ShardRecordProcessor {
   private final Scheduler scheduler;
 
-  public MyCustomConsumer(Endpoint endpoint, Processor processor, Scheduler scheduler) {
+  public CamelKclConsumer(Endpoint endpoint, Processor processor, Scheduler scheduler) {
     super(endpoint, processor);
     this.scheduler = scheduler;
   }
@@ -55,11 +54,11 @@ public class MyCustomConsumer extends DefaultConsumer implements ShardRecordProc
   @Autowired
   private ApplicationContext beanFactory;
 
-  MyCustomConsumer consumer;
+  CamelKclConsumer consumer;
 
   // @Autowired ConsumerBridge bridge;
 
-  private static final Logger log = LoggerFactory.getLogger(SampleRecordProcessor.class);
+  private static final Logger log = LoggerFactory.getLogger(KclRecordProcessor.class);
 
   private String shardId;
 
@@ -73,7 +72,7 @@ public class MyCustomConsumer extends DefaultConsumer implements ShardRecordProc
     shardId = initializationInput.shardId();
     MDC.put(SHARD_ID_MDC_KEY, shardId);
     try {
-      consumer = (MyCustomConsumer) beanFactory.getBean("myCustomEndpoint", MyCustomEndpoint.class).createConsumer(new MyCustomProcessor());
+      consumer = (CamelKclConsumer) beanFactory.getBean("myCustomEndpoint", CamelKclEndpoint.class).createConsumer(new CamelKclProcessor());
     } catch (Exception e) {
       throw new RuntimeException(e);
     }

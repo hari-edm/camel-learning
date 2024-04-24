@@ -1,14 +1,11 @@
-package com.edm.camellearning;
+package com.edm.camellearning.kcl;
 
-import com.edm.camellearning.components.ConsumerBridge;
-import com.edm.camellearning.components.MyCustomConsumer;
-import com.edm.camellearning.components.MyCustomEndpoint;
-import com.edm.camellearning.components.MyCustomProcessor;
-import org.apache.camel.Consumer;
+import com.edm.camellearning.components.CamelKclConsumer;
+import com.edm.camellearning.components.CamelKclEndpoint;
+import com.edm.camellearning.components.CamelKclProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
-import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Scope;
@@ -20,22 +17,21 @@ import software.amazon.kinesis.processor.ShardRecordProcessor;
 
 @Component
 @Scope(value = "prototype")
-public class SampleRecordProcessor implements ShardRecordProcessor{
+public class KclRecordProcessor implements ShardRecordProcessor {
 
-  public  SampleRecordProcessor(ApplicationContext context){
+  public KclRecordProcessor(ApplicationContext context) {
     this.beanFactory = context;
-
   }
 
   private static final String SHARD_ID_MDC_KEY = "ShardId";
 
-  @Autowired  private ApplicationContext beanFactory;
+  @Autowired private ApplicationContext beanFactory;
 
-  MyCustomConsumer consumer;
+  CamelKclConsumer consumer;
 
- // @Autowired ConsumerBridge bridge;
+  // @Autowired ConsumerBridge bridge;
 
-  private static final Logger log = LoggerFactory.getLogger(SampleRecordProcessor.class);
+  private static final Logger log = LoggerFactory.getLogger(KclRecordProcessor.class);
 
   private String shardId;
 
@@ -48,12 +44,16 @@ public class SampleRecordProcessor implements ShardRecordProcessor{
   public void initialize(InitializationInput initializationInput) {
     shardId = initializationInput.shardId();
     MDC.put(SHARD_ID_MDC_KEY, shardId);
-      try {
-         consumer = (MyCustomConsumer) beanFactory.getBean("myCustomEndpoint", MyCustomEndpoint.class).createConsumer(new MyCustomProcessor());
-      } catch (Exception e) {
-          throw new RuntimeException(e);
-      }
-      try {
+    try {
+      consumer =
+          (CamelKclConsumer)
+              beanFactory
+                  .getBean("myCustomEndpoint", CamelKclEndpoint.class)
+                  .createConsumer(new CamelKclProcessor());
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
+    try {
       log.info("Initializing @ Sequence: {}", initializationInput.extendedSequenceNumber());
     } finally {
       MDC.remove(SHARD_ID_MDC_KEY);
@@ -77,7 +77,7 @@ public class SampleRecordProcessor implements ShardRecordProcessor{
               r ->
                   log.info(
                       "Processing record pk: {} -- Seq: {}", r.partitionKey(), r.sequenceNumber()));
-     consumer.readMessage(processRecordsInput);
+      consumer.readMessage(processRecordsInput);
     } catch (Throwable t) {
       log.error("Caught throwable while processing records. Aborting.");
       Runtime.getRuntime().halt(1);

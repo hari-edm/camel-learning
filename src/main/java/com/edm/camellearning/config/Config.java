@@ -1,12 +1,8 @@
 package com.edm.camellearning.config;
 
-import com.edm.camellearning.SampleRecordProcessorFactory;
 import com.edm.camellearning.components.*;
-
+import com.edm.camellearning.kcl.KclRecordProcessorFactory;
 import java.util.UUID;
-
-import org.apache.camel.Consumer;
-import org.apache.camel.Processor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -30,34 +26,19 @@ public class Config {
   @Value("${kds.name}")
   private String streamName;
 
-  @Autowired private SampleRecordProcessorFactory factory;
-
+  @Autowired private KclRecordProcessorFactory factory;
 
   @Bean("myCustomEndpoint")
   @Scope("prototype")
-  public MyCustomEndpoint myCustomEndpoint(String uri, MyCustomComponent component) {
-    MyCustomEndpoint endpoint = new MyCustomEndpoint(uri, component,getScheduler());
-    return endpoint;
+  public CamelKclEndpoint myCustomEndpoint(String uri, CamelKclComponent component) {
+    return new CamelKclEndpoint(uri, component, getScheduler());
   }
 
   @Bean("myCustomProducer")
   @Scope("prototype")
-  public MyCustomProducer myCustomProducer(MyCustomEndpoint endpoint) {
-    return new MyCustomProducer(endpoint);
+  public CamelKclProducer myCustomProducer(CamelKclEndpoint endpoint) {
+    return new CamelKclProducer(endpoint);
   }
-
-
-
-
-
-  /* @Bean("schd")
-  public ExecutorService service(){
-      ThreadPoolProfileBuilder builder = new ThreadPoolProfileBuilder("only5threads");
-      ThreadPoolProfile threadPoolProfile = builder.poolSize(5).maxPoolSize(5).maxQueueSize(-1).build();
-      DefaultExecutorServiceManager defaultExecutorServiceManager = new DefaultExecutorServiceManager(camelContext);
-      defaultExecutorServiceManager.setDefaultThreadPoolProfile(threadPoolProfile);
-      ExecutorService executorService = defaultExecutorServiceManager.newDefaultScheduledThreadPool("only5threads","only5threads");
-  }*/
 
   @Bean
   public Scheduler getScheduler() {

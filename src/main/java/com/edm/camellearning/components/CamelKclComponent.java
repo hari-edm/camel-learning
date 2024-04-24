@@ -10,15 +10,15 @@ import org.springframework.stereotype.Component;
 import java.util.Map;
 
 @Component
-public class MyCustomComponent extends DefaultComponent {
+public class CamelKclComponent extends DefaultComponent {
 
   @Autowired private BeanFactory beanFactory;
 
   @Override
   protected Endpoint createEndpoint(String uri, String remaining, Map<String, Object> parameters)
       throws Exception {
-    MyCustomEndpoint endpoint =
-        (MyCustomEndpoint) beanFactory.getBean("myCustomEndpoint", uri, this);
+    CamelKclEndpoint endpoint =
+        (CamelKclEndpoint) beanFactory.getBean("myCustomEndpoint", uri, this);
     setProperties(endpoint, parameters);
     return endpoint;
   }

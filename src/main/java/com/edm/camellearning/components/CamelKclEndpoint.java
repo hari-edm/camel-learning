@@ -8,21 +8,21 @@ import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import software.amazon.kinesis.coordinator.Scheduler;
 
-public class MyCustomEndpoint extends DefaultEndpoint {
+public class CamelKclEndpoint extends DefaultEndpoint {
 
     @Autowired
     private BeanFactory beanFactory;
 
     private Scheduler scheduler ;
 
-    public MyCustomEndpoint(String uri, MyCustomComponent component,Scheduler scheduler) {
+    public CamelKclEndpoint(String uri, CamelKclComponent component, Scheduler scheduler) {
         super(uri, component);
         this.scheduler = scheduler;
     }
 
     @Override
     public Producer createProducer() throws Exception {
-        MyCustomProducer producer = (MyCustomProducer) beanFactory.getBean("myCustomProducer",  this);
+        CamelKclProducer producer = (CamelKclProducer) beanFactory.getBean("myCustomProducer",  this);
         return producer;
     }
 
@@ -30,7 +30,7 @@ public class MyCustomEndpoint extends DefaultEndpoint {
 
     @Override
     public Consumer createConsumer(Processor processor) throws Exception {
-    return new MyCustomConsumer(this, new MyCustomProcessor(),this.scheduler);
+    return new CamelKclConsumer(this, new CamelKclProcessor(),this.scheduler);
     }
 
     @Override
