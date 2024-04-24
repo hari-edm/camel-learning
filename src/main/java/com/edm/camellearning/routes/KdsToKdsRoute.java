@@ -13,9 +13,9 @@ public class KdsToKdsRoute extends RouteBuilder {
   public void configure() throws Exception {
 
     //   from("aws2-kinesis://my-test-input-kds?useDefaultCredentialsProvider=true")
-    from("myscheme://my-test-input-kds")
+    from("aws-kinesis-kcl-kpl://my-test-input-kds")
         //  .to("log://abcd");
-        .to("myscheme://abcd");
+        .to("aws-kinesis-kcl-kpl://abcd");
     // .to("aws2-kinesis://my-test-producer-kds?useDefaultCredentialsProvider=true");
 
   }
